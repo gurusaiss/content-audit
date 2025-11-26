@@ -1,0 +1,63 @@
+[33mcommit b119b02b04756c9380f7f7370ce537d0ca0f1a70[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: gurusaiss <gurusaiss2005@gmail.com>
+Date:   Wed Nov 26 20:43:27 2025 +0530
+
+    first commit
+
+[33mcommit 1b84a28971c60a274de229fc81bc09342ccdbf9f[m
+Author: SAI SUMITH <gurusumithss2005@gmail.com>
+Date:   Wed Nov 26 20:33:48 2025 +0530
+
+    commit
+
+[33mcommit 627552e95fbb19a84c64eee65beb8729a10da0a7[m
+Author: SAI SUMITH <gurusumithss2005@gmail.com>
+Date:   Wed Nov 26 15:01:08 2025 +0000
+
+    chore: add GitHub Pages workflow and set Vite base for project pages
+
+[33mcommit 533c41efb515d5ace1baf7fd16e99b12b33bf3ed[m
+Author: SAI SUMITH <gurusumithss2005@gmail.com>
+Date:   Wed Nov 26 14:54:57 2025 +0000
+
+    chore: add GitHub Pages deployment workflow and set Vite base for Pages
+
+[33mcommit ee2aea04967c2643842a23d9da8c8969b2c923d7[m
+Merge: 9c91d2d a281c80
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Thu Nov 20 06:00:41 2025 +0000
+
+    Improve url fetch error handling
+    
+    Enhance fetch-url-content edge function to gracefully handle blocked/forbidden URLs with friendlier messages, add browser-like headers, validate inputs, and provide clearer frontend error feedback for blocked pages.
+    
+    X-Lovable-Edit-ID: edt-b73290d1-82f2-4fce-aa98-4e575ffffd21
+
+[33mcommit a281c80aa24fde6f74676500e1a1d59335a68c33[m
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Thu Nov 20 06:00:39 2025 +0000
+
+    Changes
+
+[33mcommit 9c91d2d347860b465153fe8d853f99543282d56d[m
+Merge: 3fb0b29 28dd793
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Thu Nov 20 05:56:08 2025 +0000
+
+    Connect to Lovable Cloud
+    
+    Establishes integration with Lovable Cloud (Supabase) backend for the Content Quality Audit Tool. Adds cloud-backed endpoints, fetch-url-content, analyze-content workflows, and frontend wiring to invoke cloud functions. Prepares infrastructure for authentication, data storage, and API routes, enabling full serverless backend execution.
+    
+    X-Lovable-Edit-ID: edt-da6b272b-f9eb-43a0-ab26-38e79f924282
+
+[33mcommit 28dd7934a3d7c87c38a603fcda1106fd1adffa92[m
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Thu Nov 20 05:56:08 2025 +0000
+
+    Changes
+
+[33mcommit 3fb0b29dd7ec514145148db1f6c8842497476906[m
+Author: gpt-engineer-app[bot] <159125892+gpt-engineer-app[bot]@users.noreply.github.com>
+Date:   Thu Nov 20 05:51:43 2025 +0000
+
+    Initial commit from template vite_react_shadcn_ts_20250728_minor
