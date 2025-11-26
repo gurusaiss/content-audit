@@ -1,73 +1,85 @@
-# Welcome to your Lovable project
+# Content Quality Audit
 
-## Project info
+## URL : https://ai-content-prism.lovable.app/
 
-**URL**: https://lovable.dev/projects/afef4dd3-0fb5-407b-97a0-062931cb7ada
+A modern Vite + React + TypeScript app with Tailwind CSS and shadcn-ui. Run locally, build, and deploy to GitHub Pages.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- Fast Vite dev server and build
+- React + TypeScript UI with shadcn-ui components
+- Tailwind CSS styling
+- Ready-to-use GitHub Pages deployment workflow
 
-**Use Lovable**
+## Tech Stack
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/afef4dd3-0fb5-407b-97a0-062931cb7ada) and start prompting.
+- Vite
+- React
+- TypeScript
+- Tailwind CSS
+- shadcn-ui
 
-Changes made via Lovable will be committed automatically to this repo.
+## Prerequisites
 
-**Use your preferred IDE**
+- Node.js 18+ (recommend 20) and npm
+- Git
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Clone and setup
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+git clone https://github.com/<YOUR_USERNAME>/<YOUR_REPO>.git
+cd <YOUR_REPO>
+npm ci
+```
 
-Follow these steps:
+If you see "nmp not recognized", you likely misspelled `npm`.
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Run locally
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Then open: http://localhost:8080
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Build and preview locally
 
-**Use GitHub Codespaces**
+```bash
+npm run build
+npm run preview
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Environment variables (optional)
 
-## What technologies are used for this project?
+Create a `.env` file if you add integrations. Example:
 
-This project is built with:
+```ini
+VITE_SUPABASE_URL=<your_supabase_url>
+VITE_SUPABASE_ANON_KEY=<your_supabase_anon_key>
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Deploy to GitHub Pages
 
-## How can I deploy this project?
+This repo includes `.github/workflows/deploy-gh-pages.yml` to build and deploy on push to `main`.
 
-Simply open [Lovable](https://lovable.dev/projects/afef4dd3-0fb5-407b-97a0-062931cb7ada) and click on Share -> Publish.
+1. In GitHub, go to Settings → Pages → set Source to “GitHub Actions”.
+2. Push to `main` to trigger the workflow.
+3. Find the public URL in Actions → latest “Deploy to GitHub Pages” (look for `page_url`) or in Settings → Pages.
 
-## Can I connect a custom domain to my Lovable project?
+URL format: `https://<USERNAME>.github.io/<REPO>/`
 
-Yes, you can!
+## Troubleshooting
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+- Ensure Node 18+ (prefer 20) with `node -v` and `npm -v`.
+- If install fails on Windows with EPERM:
+  - Close terminals, then run:
+    ```powershell
+    Remove-Item -Recurse -Force node_modules; Remove-Item -Force package-lock.json; npm cache clean --force; npm install
+    ```
+- If the Pages workflow fails:
+  - Check Actions logs for the failing step (Install, Build, Upload, Deploy).
+  - Confirm workflow file exists at `.github/workflows/deploy-gh-pages.yml`.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## License
+
+Add your license here (e.g., MIT).
