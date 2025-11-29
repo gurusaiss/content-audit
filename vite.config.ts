@@ -7,7 +7,7 @@ import { componentTagger } from "lovable-tagger";
 export default defineConfig(({ mode }) => ({
   // Ensure correct base path when deployed to GitHub Pages (project pages).
   // Use repo name `ai-content-prism` as the base in production; keep `/` for dev.
-  base: mode === "development" ? "/" : "/Team-Varanasi/",
+  base: mode === "development" ? "/" : "/content-audit/",
   server: {
     host: "::",
     port: 8080,
