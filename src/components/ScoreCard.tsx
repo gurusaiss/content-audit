@@ -63,11 +63,13 @@ export const ScoreCard = ({
         {metrics && (
           <div className="grid grid-cols-2 gap-2 pt-2">
             {Object.entries(metrics).map(([key, value]) => (
-              <div key={key} className="text-sm">
-                <span className="text-muted-foreground capitalize">
+              <div key={key} className="text-sm overflow-hidden">
+                <span className="text-muted-foreground capitalize block">
                   {key.replace(/([A-Z])/g, " $1").trim()}:
                 </span>
-                <span className="ml-1 font-medium">{value}</span>
+                <span className="font-medium block truncate" title={String(value)}>
+                  {value}
+                </span>
               </div>
             ))}
           </div>

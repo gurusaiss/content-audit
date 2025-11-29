@@ -20,12 +20,12 @@ export const InputForm = ({ onAnalysisStart, onAnalysisComplete, isAnalyzing }: 
   const [urlInput, setUrlInput] = useState("");
   const { toast } = useToast();
 
-  const analyzeContent = async (content: string) => {
+  const analyzeContent = async (content: string, meta?: { title: string; description: string }) => {
     try {
       onAnalysisStart();
 
       const { data, error } = await supabase.functions.invoke("analyze-content", {
-        body: { content },
+        body: { content, meta },
       });
 
       if (error) throw error;
@@ -98,14 +98,14 @@ export const InputForm = ({ onAnalysisStart, onAnalysisComplete, isAnalyzing }: 
         throw new Error("No content extracted from URL");
       }
 
-      // Analyze the fetched content
-      await analyzeContent(urlData.content);
+      // Analyze the fetched content with metadata
+      await analyzeContent(urlData.content, urlData.meta);
     } catch (error: any) {
       console.error("URL fetch error:", error);
-      
+
       // Provide helpful error messages
       let errorMessage = "Could not retrieve content from the URL.";
-      
+
       if (error.message?.includes("blocks automated access")) {
         errorMessage = "This website blocks automated access. Please copy the article text and paste it in the 'Paste Text' tab instead.";
       } else if (error.message?.includes("not found")) {
@@ -113,14 +113,14 @@ export const InputForm = ({ onAnalysisStart, onAnalysisComplete, isAnalyzing }: 
       } else if (error.message?.includes("Invalid URL")) {
         errorMessage = "Invalid URL format. Please enter a complete URL starting with http:// or https://";
       }
-      
+
       toast({
         title: "Failed to Fetch URL",
         description: errorMessage,
         variant: "destructive",
         duration: 5000,
       });
-      
+
       onAnalysisStart(); // Reset loading state
     }
   };

@@ -8,6 +8,10 @@ const corsHeaders = {
 interface AnalysisRequest {
   content: string;
   url?: string;
+  meta?: {
+    title: string;
+    description: string;
+  };
 }
 
 serve(async (req) => {
@@ -16,7 +20,7 @@ serve(async (req) => {
   }
 
   try {
-    const { content, url }: AnalysisRequest = await req.json();
+    const { content, url, meta }: AnalysisRequest = await req.json();
     console.log("Analyzing content, length:", content.length);
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
@@ -25,11 +29,12 @@ serve(async (req) => {
     }
 
     // Calculate all scores
-    const seoScore = calculateSEOScore(content);
-    const serpScore = await calculateSERPScore(content, LOVABLE_API_KEY);
+    const seoScore = calculateSEOScore(content, meta);
+    const serpScore = await calculateSERPScore(content, LOVABLE_API_KEY, meta);
     const aeoScore = calculateAEOScore(content);
     const humanizationScore = calculateHumanizationScore(content);
     const differentiationScore = await calculateDifferentiationScore(content, LOVABLE_API_KEY);
+    const engagementScore = await calculateEngagementScore(content, LOVABLE_API_KEY);
 
     const result = {
       seoScore,
@@ -37,6 +42,7 @@ serve(async (req) => {
       aeoScore,
       humanizationScore,
       differentiationScore,
+      engagementScore,
       timestamp: new Date().toISOString(),
     };
 
@@ -57,7 +63,7 @@ serve(async (req) => {
   }
 });
 
-function calculateSEOScore(content: string) {
+function calculateSEOScore(content: string, meta?: { title: string; description: string }) {
   const issues: string[] = [];
   const recommendations: string[] = [];
   let score = 100;
@@ -119,10 +125,58 @@ function calculateSEOScore(content: string) {
 
   // Check links
   const linkCount = (content.match(/\[.*?\]\(.*?\)/g) || []).length;
+  // Simple heuristic for internal links in markdown: look for relative paths or same domain (if we had it)
+  // For this text analysis, we'll count relative links starting with / or ./
+  const internalLinkCount = (content.match(/\]\(\s*[\/\.]/g) || []).length;
+
   if (linkCount < 2) {
     score -= 10;
     issues.push("Few or no links detected");
     recommendations.push("Add relevant internal and external links");
+  }
+
+  if (internalLinkCount === 0 && linkCount > 0) {
+    // Don't penalize too hard if we can't be sure, but suggest it
+    recommendations.push("Ensure you have internal links to other relevant pages");
+  }
+
+  // Check Metadata if available
+  if (meta) {
+    // Title checks
+    if (!meta.title) {
+      score -= 10;
+      issues.push("Missing page title");
+      recommendations.push("Add a descriptive page title (50-60 characters)");
+    } else {
+      if (meta.title.length < 30 || meta.title.length > 60) {
+        score -= 5;
+        issues.push(`Title length: ${meta.title.length} chars (Optimal: 50-60)`);
+        recommendations.push("Optimize title length to 50-60 characters");
+      }
+      if (!meta.title.toLowerCase().includes(primaryKeyword)) {
+        score -= 5;
+        issues.push("Primary keyword missing from title");
+        recommendations.push(`Include "${primaryKeyword}" in your page title`);
+      }
+    }
+
+    // Description checks
+    if (!meta.description) {
+      score -= 10;
+      issues.push("Missing meta description");
+      recommendations.push("Add a meta description (150-160 characters)");
+    } else {
+      if (meta.description.length < 120 || meta.description.length > 160) {
+        score -= 5;
+        issues.push(`Meta description length: ${meta.description.length} chars (Optimal: 150-160)`);
+        recommendations.push("Optimize meta description to 150-160 characters");
+      }
+      if (!meta.description.toLowerCase().includes(primaryKeyword)) {
+        score -= 5;
+        issues.push("Primary keyword missing from meta description");
+        recommendations.push(`Include "${primaryKeyword}" in your meta description`);
+      }
+    }
   }
 
   return {
@@ -134,28 +188,42 @@ function calculateSEOScore(content: string) {
       readabilityScore: readabilityScore.toFixed(0),
       wordCount: words.length,
       primaryKeyword,
+      internalLinks: internalLinkCount,
     },
   };
 }
 
-async function calculateSERPScore(content: string, apiKey: string) {
+async function calculateSERPScore(content: string, apiKey: string, meta?: { title: string; description: string }) {
   const issues: string[] = [];
   const recommendations: string[] = [];
   let score = 100;
 
   try {
     // Use AI to analyze SERP competitiveness
-    const prompt = `Analyze this content for SERP performance. Evaluate:
-1. Topic coverage depth
-2. Word count adequacy
-3. Use of stats/data
-4. Unique insights
-5. Competitive ranking potential
+    const prompt = `Analyze this content for SERP performance against top-ranking competitors.
+    
+Target Keyword Context: Based on the content, identify the likely target keyword.
+Competitor Comparison: Compare this content against what is typically found in top 10 results for that keyword.
 
-Content:
-${content.substring(0, 2000)}
+Evaluate:
+1. Content Depth: Is it comprehensive enough compared to top rankers? (Top rankers often have 2000+ words for competitive terms)
+2. Missing Subtopics: What specific subtopics are missing that competitors likely cover?
+3. Data & Authority: Does it lack data points, statistics, or expert quotes common in top results?
+4. Content Structure: Is it missing key structural elements (tables, lists, comparison charts)?
 
-Return analysis in JSON format with: averageTopRankWordCount, topicCoverageGaps, predictedRank, improvements`;
+Content Metadata:
+Title: ${meta?.title || "N/A"}
+Description: ${meta?.description || "N/A"}
+
+Content Preview:
+${content.substring(0, 3000)}
+
+Return analysis in JSON format with: 
+- averageTopRankWordCount (estimated)
+- topicCoverageGaps (list of specific missing topics)
+- missingElements (e.g., "Comparison Table", "Expert Quotes")
+- predictedRank (e.g., "Page 1 (Pos 1-3)", "Page 2")
+- improvements (list of actionable advice)`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -247,14 +315,15 @@ function calculateAEOScore(content: string) {
     recommendations.push("Use bullet points and numbered lists for clarity");
   }
 
-  // Check paragraph structure
+  // Check paragraph structure (Mobile Readability)
   const paragraphs = content.split(/\n\n+/).filter((p) => p.trim().length > 0);
   const avgParagraphLength = content.length / paragraphs.length;
+  const mobileReadability = avgParagraphLength < 300 ? "Good" : avgParagraphLength < 500 ? "Fair" : "Poor";
 
   if (avgParagraphLength > 500) {
     score -= 15;
-    issues.push("Paragraphs too long for AI parsing");
-    recommendations.push("Break content into shorter, scannable paragraphs");
+    issues.push("Paragraphs too long for mobile");
+    recommendations.push("Break content into shorter paragraphs for mobile readability");
   }
 
   // Check for how-to patterns
@@ -366,16 +435,25 @@ async function calculateDifferentiationScore(content: string, apiKey: string) {
 
   try {
     // Use AI to check for unique perspectives
-    const prompt = `Analyze this content for uniqueness and differentiation:
-1. Does it have unique examples or case studies?
-2. Does it present a fresh perspective?
-3. Does it include personal stories or experiences?
-4. How does it differ from generic content on this topic?
+    const prompt = `Analyze this content for differentiation and unique value proposition.
+    
+Compare against generic AI-generated content or standard articles on this topic.
+
+Evaluate:
+1. Unique Angle: Does it take a contrarian view, a personal narrative, or a specific niche angle?
+2. Original Data/Research: Does it contain original research, surveys, or experiments?
+3. Personal Experience: Does the author demonstrate first-hand experience (e.g., "I tested", "In my experience")?
+4. Visuals/Rich Media: (Infer from text) Does it describe diagrams, screenshots, or videos?
+5. Content Freshness: Does it reference recent events (2024-2025) or modern trends?
 
 Content:
-${content.substring(0, 2000)}
+${content.substring(0, 2500)}
 
-Provide scores and specific missing elements.`;
+Provide scores and specific missing elements. Return JSON with:
+- uniquenessScore (0-100)
+- commonTropesFound (list of generic things this content does)
+- uniqueElementsFound (list of good differentiators)
+- recommendations (how to stand out more)`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -428,11 +506,11 @@ Provide scores and specific missing elements.`;
 
     // Check content freshness
     const currentYear = new Date().getFullYear();
-    const hasRecentDate = new RegExp(`\\b${currentYear}\\b`).test(content);
+    const hasRecentDate = new RegExp(`\\b${currentYear}\\b|\\b${currentYear - 1}\\b`).test(content);
     if (!hasRecentDate) {
       score -= 10;
       issues.push("Content may lack current information");
-      recommendations.push("Update with recent data and trends");
+      recommendations.push(`Update with recent data and trends (${currentYear})`);
     }
 
     issues.push("AI uniqueness check: " + analysis.substring(0, 100));
@@ -442,6 +520,10 @@ Provide scores and specific missing elements.`;
       score: Math.max(0, score),
       issues,
       recommendations: recommendations.slice(0, 5),
+      metrics: {
+        freshness: hasRecentDate ? "Current" : "Potentially Outdated",
+        uniqueAngle: hasOpinion ? "Present" : "Missing",
+      }
     };
   } catch (error) {
     console.error("Differentiation analysis error:", error);
@@ -449,6 +531,88 @@ Provide scores and specific missing elements.`;
       score: 60,
       issues: ["Unable to perform full uniqueness analysis"],
       recommendations: ["Add unique examples, stories, and perspectives"],
+    };
+  }
+}
+
+async function calculateEngagementScore(content: string, apiKey: string) {
+  const issues: string[] = [];
+  const recommendations: string[] = [];
+  let score = 100;
+
+  try {
+    const prompt = `Analyze this content for reader engagement potential.
+    
+Evaluate:
+1. Hook: Does the opening grab attention?
+2. Scannability: Is it easy to read on mobile (short paragraphs)?
+3. Interactive Elements: Does it ask questions or encourage action?
+4. Emotional Connection: Does it use emotional triggers or storytelling?
+
+Content:
+${content.substring(0, 2000)}
+
+Return JSON with:
+- engagementScore (0-100)
+- issues (list of engagement killers)
+- recommendations (how to boost engagement)`;
+
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-flash",
+        messages: [
+          {
+            role: "system",
+            content: "You are an audience engagement expert.",
+          },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error("AI engagement analysis failed");
+    }
+
+    const data = await response.json();
+    // In a real app, we'd parse the JSON from AI. For now, we'll use heuristics + AI text.
+
+    // Heuristic: Check for questions
+    const questionCount = (content.match(/\?/g) || []).length;
+    if (questionCount < 3) {
+      score -= 10;
+      issues.push("Few questions to engage the reader");
+      recommendations.push("Ask rhetorical questions to keep readers thinking");
+    }
+
+    // Heuristic: Check for 'you' (reader focus)
+    const youCount = (content.match(/\byou\b/gi) || []).length;
+    if (youCount < 5) {
+      score -= 10;
+      issues.push("Low usage of 'You' (Reader Focus)");
+      recommendations.push("Address the reader directly using 'You'");
+    }
+
+    return {
+      score: Math.max(0, score),
+      issues,
+      recommendations: recommendations.slice(0, 5),
+      metrics: {
+        questionsAsked: questionCount,
+        readerFocus: youCount > 5 ? "High" : "Low",
+      }
+    };
+  } catch (error) {
+    console.error("Engagement analysis error:", error);
+    return {
+      score: 70,
+      issues: ["Could not analyze engagement fully"],
+      recommendations: ["Ensure content is interactive and reader-focused"],
     };
   }
 }

@@ -12,5 +12,6 @@ export interface AnalysisResults {
   aeoScore: ScoreResult;
   humanizationScore: ScoreResult;
   differentiationScore: ScoreResult;
+  engagementScore?: ScoreResult;
   timestamp: string;
 }

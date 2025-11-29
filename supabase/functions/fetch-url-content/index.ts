@@ -57,6 +57,10 @@ serve(async (req) => {
       throw new Error("Failed to parse HTML");
     }
 
+    // Extract metadata
+    const title = doc.querySelector("title")?.textContent || "";
+    const metaDescription = doc.querySelector('meta[name="description"]')?.getAttribute("content") || "";
+
     // Remove script and style elements
     const scripts = doc.querySelectorAll("script, style, nav, footer, aside");
     scripts.forEach((el) => el.parentNode?.removeChild(el));
@@ -82,7 +86,7 @@ serve(async (req) => {
     console.log("Extracted content length:", content.length);
 
     return new Response(
-      JSON.stringify({ content, url }),
+      JSON.stringify({ content, url, meta: { title, description: metaDescription } }),
       {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       }
