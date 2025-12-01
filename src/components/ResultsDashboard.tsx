@@ -1,7 +1,7 @@
 import { AnalysisResults } from "@/types/analysis";
 import { ScoreCard } from "@/components/ScoreCard";
 import { Button } from "@/components/ui/button";
-import { Download, FileImage, FileText } from "lucide-react";
+import { Download, FileImage, FileText, Sparkles, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
   Radar,
@@ -21,6 +21,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { SerpAnalysisView } from "@/components/SerpAnalysisView";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ContentEditor } from "@/components/ContentEditor";
+import { GapAnalysisView } from "@/components/GapAnalysisView";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ResultsDashboardProps {
   results: AnalysisResults;
@@ -196,122 +200,236 @@ ${results.engagementScore.metrics ? `Metrics:\n${Object.entries(results.engageme
         </div>
       </div>
 
-      {/* Overview Section: Graph and Table */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Radar Chart */}
-        <div className="h-[300px] w-full border rounded-lg p-4 flex items-center justify-center bg-card">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
-              <PolarGrid />
-              <PolarAngleAxis dataKey="subject" />
-              <PolarRadiusAxis angle={30} domain={[0, 100]} />
-              <Radar
-                name="Score"
-                dataKey="A"
-                stroke="#8884d8"
-                fill="#8884d8"
-                fillOpacity={0.6}
+      <Tabs defaultValue="overview" className="w-full">
+        <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsTrigger value="ai-detection">AI Detection</TabsTrigger>
+          <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
+          <TabsTrigger value="aeo">AEO Optimizer</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="overview" className="space-y-8">
+          {/* Overview Section: Graph and Table */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Radar Chart */}
+            <div className="h-[300px] w-full border rounded-lg p-4 flex items-center justify-center bg-card">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={chartData}>
+                  <PolarGrid />
+                  <PolarAngleAxis dataKey="subject" />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                  <Radar
+                    name="Score"
+                    dataKey="A"
+                    stroke="#8884d8"
+                    fill="#8884d8"
+                    fillOpacity={0.6}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            {/* Summary Table */}
+            <div className="border rounded-lg overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Metric</TableHead>
+                    <TableHead className="text-right">Score</TableHead>
+                    <TableHead>Status</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {chartData.map((item) => (
+                    <TableRow key={item.subject}>
+                      <TableCell className="font-medium">{item.subject}</TableCell>
+                      <TableCell className="text-right">{item.A}/100</TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${item.A >= 80
+                            ? "bg-green-100 text-green-800"
+                            : item.A >= 60
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                            }`}
+                        >
+                          {item.A >= 80 ? "Excellent" : item.A >= 60 ? "Good" : "Needs Work"}
+                        </span>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+
+          {results.serpAnalysis && (
+            <SerpAnalysisView
+              competitors={results.serpAnalysis.competitors}
+              comparison={results.serpAnalysis.comparison}
+            />
+          )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <ScoreCard
+              title="SEO Score"
+              score={results.seoScore.score}
+              issues={results.seoScore.issues}
+              recommendations={results.seoScore.recommendations}
+              metrics={results.seoScore.metrics}
+              color="primary"
+            />
+
+            <ScoreCard
+              title="SERP Performance"
+              score={results.serpScore.score}
+              issues={results.serpScore.issues}
+              recommendations={results.serpScore.recommendations}
+              predictedRank={results.serpScore.predictedRank}
+              color="accent"
+            />
+
+            <ScoreCard
+              title="AEO Score"
+              score={results.aeoScore.score}
+              issues={results.aeoScore.issues}
+              recommendations={results.aeoScore.recommendations}
+              color="success"
+            />
+
+            <ScoreCard
+              title="Humanization"
+              score={results.humanizationScore.score}
+              issues={results.humanizationScore.issues}
+              recommendations={results.humanizationScore.recommendations}
+              metrics={results.humanizationScore.metrics}
+              color="warning"
+            />
+
+            <ScoreCard
+              title="Differentiation"
+              score={results.differentiationScore.score}
+              issues={results.differentiationScore.issues}
+              recommendations={results.differentiationScore.recommendations}
+              color="primary"
+            />
+
+            {results.engagementScore && (
+              <ScoreCard
+                title="Engagement Score"
+                score={results.engagementScore.score}
+                issues={results.engagementScore.issues}
+                recommendations={results.engagementScore.recommendations}
+                metrics={results.engagementScore.metrics}
+                color="success"
               />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
+            )}
+          </div>
+        </TabsContent>
 
-        {/* Summary Table */}
-        <div className="border rounded-lg overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Metric</TableHead>
-                <TableHead className="text-right">Score</TableHead>
-                <TableHead>Status</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {chartData.map((item) => (
-                <TableRow key={item.subject}>
-                  <TableCell className="font-medium">{item.subject}</TableCell>
-                  <TableCell className="text-right">{item.A}/100</TableCell>
-                  <TableCell>
-                    <span
-                      className={`px-2 py-1 rounded-full text-xs ${item.A >= 80
-                        ? "bg-green-100 text-green-800"
-                        : item.A >= 60
-                          ? "bg-yellow-100 text-yellow-800"
-                          : "bg-red-100 text-red-800"
-                        }`}
-                    >
-                      {item.A >= 80 ? "Excellent" : item.A >= 60 ? "Good" : "Needs Work"}
-                    </span>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      </div>
+        <TabsContent value="ai-detection">
+          {results.aiDetection ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Card className="bg-red-50 border-red-200">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg text-red-700">High AI</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-red-800">{results.aiDetection.breakdown?.highAi || 0}%</div>
+                    <p className="text-sm text-red-600 mt-1">Probability of AI generated content</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-yellow-50 border-yellow-200">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg text-yellow-700">Mixed</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-yellow-800">{results.aiDetection.breakdown?.mixed || 0}%</div>
+                    <p className="text-sm text-yellow-600 mt-1">Contains both AI and human patterns</p>
+                  </CardContent>
+                </Card>
+                <Card className="bg-green-50 border-green-200">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-lg text-green-700">Human</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-green-800">{results.aiDetection.breakdown?.human || 0}%</div>
+                    <p className="text-sm text-green-600 mt-1">Likely written by a human</p>
+                  </CardContent>
+                </Card>
+              </div>
 
-      {results.serpAnalysis && (
-        <SerpAnalysisView
-          competitors={results.serpAnalysis.competitors}
-          comparison={results.serpAnalysis.comparison}
-        />
-      )}
+              <ContentEditor
+                segments={results.aiDetection.segments}
+                overallScore={results.aiDetection.overallAiScore}
+              />
+            </div>
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              AI Detection data not available.
+            </div>
+          )}
+        </TabsContent>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <ScoreCard
-          title="SEO Score"
-          score={results.seoScore.score}
-          issues={results.seoScore.issues}
-          recommendations={results.seoScore.recommendations}
-          metrics={results.seoScore.metrics}
-          color="primary"
-        />
+        <TabsContent value="gap-analysis">
+          {results.gapAnalysis ? (
+            <GapAnalysisView
+              missingTopics={results.gapAnalysis.missingTopics}
+              contentGaps={results.gapAnalysis.contentGaps}
+            />
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              Gap Analysis data not available.
+            </div>
+          )}
+        </TabsContent>
 
-        <ScoreCard
-          title="SERP Performance"
-          score={results.serpScore.score}
-          issues={results.serpScore.issues}
-          recommendations={results.serpScore.recommendations}
-          predictedRank={results.serpScore.predictedRank}
-          color="accent"
-        />
+        <TabsContent value="aeo">
+          {results.snippetOptimization ? (
+            <div className="grid grid-cols-1 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="h-full border-muted">
+                  <CardHeader>
+                    <CardTitle className="text-lg text-muted-foreground">Current Snippet Potential</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-6 bg-muted/50 rounded-xl font-mono text-sm leading-relaxed border border-muted">
+                      {results.snippetOptimization.currentSnippet || "No clear snippet found."}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <AlertCircle className="h-4 w-4" />
+                      <span>This is what search engines might currently pull from your content.</span>
+                    </div>
+                  </CardContent>
+                </Card>
 
-        <ScoreCard
-          title="AEO Score"
-          score={results.aeoScore.score}
-          issues={results.aeoScore.issues}
-          recommendations={results.aeoScore.recommendations}
-          color="success"
-        />
-
-        <ScoreCard
-          title="Humanization"
-          score={results.humanizationScore.score}
-          issues={results.humanizationScore.issues}
-          recommendations={results.humanizationScore.recommendations}
-          metrics={results.humanizationScore.metrics}
-          color="warning"
-        />
-
-        <ScoreCard
-          title="Differentiation"
-          score={results.differentiationScore.score}
-          issues={results.differentiationScore.issues}
-          recommendations={results.differentiationScore.recommendations}
-          color="primary"
-        />
-
-        {results.engagementScore && (
-          <ScoreCard
-            title="Engagement Score"
-            score={results.engagementScore.score}
-            issues={results.engagementScore.issues}
-            recommendations={results.engagementScore.recommendations}
-            metrics={results.engagementScore.metrics}
-            color="success"
-          />
-        )}
-      </div>
+                <Card className="h-full border-primary/20 bg-primary/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg text-primary">
+                      <Sparkles className="h-5 w-5" />
+                      Optimized Snippet
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="p-6 bg-background rounded-xl font-medium text-lg leading-relaxed border border-primary/10 shadow-sm">
+                      {results.snippetOptimization.potentialSnippet}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-primary/80">
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Use this concise definition to increase your chances of winning a Featured Snippet.</span>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              AEO data not available.
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

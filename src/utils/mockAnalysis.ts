@@ -9,6 +9,9 @@ export const mockAnalysis = async (content: string, targetKeyword?: string): Pro
         ? (content.toLowerCase().match(new RegExp(targetKeyword.toLowerCase(), 'g')) || []).length / wordCount * 100
         : 0;
 
+    const keyword = targetKeyword || "Content Strategy";
+    const safeKeyword = encodeURIComponent(keyword);
+
     return {
         timestamp: new Date().toISOString(),
         targetKeyword,
@@ -102,11 +105,11 @@ export const mockAnalysis = async (content: string, targetKeyword?: string): Pro
         },
         serpAnalysis: {
             competitors: [
-                { title: "Ultimate Guide to " + (targetKeyword || "Content Audit"), url: "https://competitor1.com/guide", rank: 1, score: 95 },
-                { title: "How to Master " + (targetKeyword || "Content Audit"), url: "https://competitor2.com/master", rank: 2, score: 92 },
-                { title: "10 Tips for " + (targetKeyword || "Content Audit"), url: "https://competitor3.com/tips", rank: 3, score: 89 },
-                { title: "Why " + (targetKeyword || "Content Audit") + " Matters", url: "https://competitor4.com/why", rank: 4, score: 87 },
-                { title: "Best Practices for " + (targetKeyword || "Content Audit"), url: "https://competitor5.com/best-practices", rank: 5, score: 85 },
+                { title: `The Ultimate Guide to ${keyword}`, url: `https://example.com/guide/${safeKeyword}`, rank: 1, score: 95 },
+                { title: `How to Master ${keyword} in 2024`, url: `https://example.com/master/${safeKeyword}`, rank: 2, score: 92 },
+                { title: `10 Proven Tips for ${keyword}`, url: `https://example.com/tips/${safeKeyword}`, rank: 3, score: 89 },
+                { title: `Why ${keyword} Matters for Your Business`, url: `https://example.com/why/${safeKeyword}`, rank: 4, score: 87 },
+                { title: `${keyword} Best Practices Checklist`, url: `https://example.com/checklist/${safeKeyword}`, rank: 5, score: 85 },
             ],
             comparison: {
                 userWordCount: wordCount,
@@ -114,6 +117,36 @@ export const mockAnalysis = async (content: string, targetKeyword?: string): Pro
                 userKeywordDensity: parseFloat(keywordDensity.toFixed(2)),
                 avgCompetitorKeywordDensity: 1.5,
             }
+        },
+        aiDetection: {
+            overallAiScore: 65,
+            segments: content.match(/[^.!?]+[.!?]+/g)?.map((sentence, index) => ({
+                text: sentence,
+                type: index % 3 === 0 ? "ai" : index % 3 === 1 ? "mixed" : "human",
+                score: index % 3 === 0 ? 95 : index % 3 === 1 ? 50 : 10
+            })) || [],
+            breakdown: {
+                highAi: 35,
+                mixed: 45,
+                human: 20
+            }
+        },
+        gapAnalysis: {
+            missingTopics: [
+                `History and Evolution of ${keyword}`,
+                `Key Benefits of Implementing ${keyword}`,
+                `Common Mistakes to Avoid in ${keyword}`,
+                `Future Trends in ${keyword}`
+            ],
+            contentGaps: [
+                `Your content lacks a dedicated section on 'Tools and Technologies for ${keyword}'.`,
+                `Competitors go into more depth on 'Step-by-Step Process for ${keyword}'.`,
+                `You are missing a 'Conclusion' with actionable takeaways for ${keyword}.`
+            ]
+        },
+        snippetOptimization: {
+            currentSnippet: content.slice(0, 150) + "...",
+            potentialSnippet: `${keyword} is a strategic approach to creating and distributing valuable, relevant, and consistent content to attract and retain a clearly defined audience — and, ultimately, to drive profitable customer action.`
         }
     };
 };

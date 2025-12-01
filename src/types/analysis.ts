@@ -28,5 +28,26 @@ export interface AnalysisResults {
       avgCompetitorKeywordDensity: number;
     };
   };
+  aiDetection?: {
+    segments: {
+      text: string;
+      type: "ai" | "human" | "mixed";
+      score: number;
+    }[];
+    overallAiScore: number;
+    breakdown: {
+      highAi: number;
+      mixed: number;
+      human: number;
+    };
+  };
+  gapAnalysis?: {
+    missingTopics: string[];
+    contentGaps: string[];
+  };
+  snippetOptimization?: {
+    currentSnippet?: string;
+    potentialSnippet: string;
+  };
   timestamp: string;
 }
