@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { SerpAnalysisView } from "@/components/SerpAnalysisView";
 
 interface ResultsDashboardProps {
   results: AnalysisResults;
@@ -32,7 +33,7 @@ export const ResultsDashboard = ({ results }: ResultsDashboardProps) => {
     const reportContent = `
 CONTENT QUALITY AUDIT REPORT
 Generated: ${new Date(results.timestamp).toLocaleString()}
-
+${results.targetKeyword ? `Target Keyword: ${results.targetKeyword}\n` : ''}
 ================================
 SEO SCORE: ${results.seoScore.score}/100
 ================================
@@ -172,6 +173,11 @@ ${results.engagementScore.metrics ? `Metrics:\n${Object.entries(results.engageme
           <h2 className="text-3xl font-bold">Analysis Results</h2>
           <p className="text-muted-foreground mt-1">
             Overall Score: <span className="font-semibold text-foreground">{avgScore}/100</span>
+            {results.targetKeyword && (
+              <span className="ml-4">
+                Target Keyword: <span className="font-semibold text-primary">{results.targetKeyword}</span>
+              </span>
+            )}
           </p>
         </div>
         <div className="flex gap-2">
@@ -228,10 +234,10 @@ ${results.engagementScore.metrics ? `Metrics:\n${Object.entries(results.engageme
                   <TableCell>
                     <span
                       className={`px-2 py-1 rounded-full text-xs ${item.A >= 80
-                          ? "bg-green-100 text-green-800"
-                          : item.A >= 60
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
+                        ? "bg-green-100 text-green-800"
+                        : item.A >= 60
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
                         }`}
                     >
                       {item.A >= 80 ? "Excellent" : item.A >= 60 ? "Good" : "Needs Work"}
@@ -243,6 +249,13 @@ ${results.engagementScore.metrics ? `Metrics:\n${Object.entries(results.engageme
           </Table>
         </div>
       </div>
+
+      {results.serpAnalysis && (
+        <SerpAnalysisView
+          competitors={results.serpAnalysis.competitors}
+          comparison={results.serpAnalysis.comparison}
+        />
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <ScoreCard

@@ -13,5 +13,20 @@ export interface AnalysisResults {
   humanizationScore: ScoreResult;
   differentiationScore: ScoreResult;
   engagementScore?: ScoreResult;
+  targetKeyword?: string;
+  serpAnalysis?: {
+    competitors: {
+      title: string;
+      url: string;
+      rank: number;
+      score: number;
+    }[];
+    comparison: {
+      userWordCount: number;
+      avgCompetitorWordCount: number;
+      userKeywordDensity: number;
+      avgCompetitorKeywordDensity: number;
+    };
+  };
   timestamp: string;
 }

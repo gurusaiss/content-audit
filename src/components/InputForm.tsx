@@ -6,8 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, FileText, Link } from "lucide-react";
+import { Loader2, FileText, Link, Target } from "lucide-react";
 import { AnalysisResults } from "@/types/analysis";
+import { mockAnalysis } from "@/utils/mockAnalysis";
 
 interface InputFormProps {
   onAnalysisStart: () => void;
@@ -18,17 +19,24 @@ interface InputFormProps {
 export const InputForm = ({ onAnalysisStart, onAnalysisComplete, isAnalyzing }: InputFormProps) => {
   const [textContent, setTextContent] = useState("");
   const [urlInput, setUrlInput] = useState("");
+  const [targetKeyword, setTargetKeyword] = useState("");
   const { toast } = useToast();
 
   const analyzeContent = async (content: string, meta?: { title: string; description: string }) => {
     try {
       onAnalysisStart();
 
+      // Use mock analysis for now to demonstrate advanced features
+      const data = await mockAnalysis(content, targetKeyword);
+
+      // Original Supabase call (commented out for now)
+      /*
       const { data, error } = await supabase.functions.invoke("analyze-content", {
-        body: { content, meta },
+        body: { content, meta, targetKeyword },
       });
 
       if (error) throw error;
+      */
 
       onAnalysisComplete(data as AnalysisResults);
 
@@ -132,6 +140,21 @@ export const InputForm = ({ onAnalysisStart, onAnalysisComplete, isAnalyzing }: 
           <h2 className="text-3xl font-bold mb-2">Analyze Your Content</h2>
           <p className="text-muted-foreground">
             Get comprehensive insights on SEO, SERP performance, AEO, humanization, and differentiation
+          </p>
+        </div>
+
+        <div className="mb-6">
+          <div className="relative">
+            <Target className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Target Keyword (Optional but recommended)"
+              value={targetKeyword}
+              onChange={(e) => setTargetKeyword(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+          <p className="text-xs text-muted-foreground mt-1 ml-1">
+            Enter a target keyword to get more accurate SEO and SERP analysis
           </p>
         </div>
 
