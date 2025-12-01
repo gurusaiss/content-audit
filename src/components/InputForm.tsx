@@ -50,6 +50,7 @@ export const InputForm = ({ onAnalysisStart, onAnalysisComplete, isAnalyzing }: 
         title: "Analysis Failed",
         description: "Failed to analyze content. Please try again.",
         variant: "destructive",
+        action: <Button variant="outline" size="sm" onClick={() => analyzeContent(content, meta)}>Try Again</Button>
       });
     }
   };
@@ -60,6 +61,16 @@ export const InputForm = ({ onAnalysisStart, onAnalysisComplete, isAnalyzing }: 
         title: "No Content",
         description: "Please enter some content to analyze.",
         variant: "destructive",
+      });
+      return;
+    }
+
+    if (textContent.length > 25000) { // Approx 5000 words
+      toast({
+        title: "Content Too Long",
+        description: "Please reduce your text to under 5000 words for optimal analysis.",
+        variant: "destructive",
+        action: <Button variant="outline" size="sm" onClick={() => setTextContent(textContent.slice(0, 25000))}>Truncate</Button>
       });
       return;
     }

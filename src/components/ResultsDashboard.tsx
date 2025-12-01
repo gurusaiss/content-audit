@@ -24,6 +24,10 @@ import { SerpAnalysisView } from "@/components/SerpAnalysisView";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ContentEditor } from "@/components/ContentEditor";
 import { GapAnalysisView } from "@/components/GapAnalysisView";
+import { TopicClustersView } from "@/components/TopicClustersView";
+import { TechnicalAuditView } from "@/components/TechnicalAuditView";
+import { ReportingView } from "@/components/ReportingView";
+import { AiChatWidget } from "@/components/AiChatWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface ResultsDashboardProps {
@@ -201,11 +205,17 @@ ${results.engagementScore.metrics ? `Metrics:\n${Object.entries(results.engageme
       </div>
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="grid w-full grid-cols-4 mb-8">
+        <TabsList className="grid w-full grid-cols-7 mb-8 h-auto p-1">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="ai-detection">AI Detection</TabsTrigger>
           <TabsTrigger value="gap-analysis">Gap Analysis</TabsTrigger>
           <TabsTrigger value="aeo">AEO Optimizer</TabsTrigger>
+          <TabsTrigger value="topic-clusters">Topic Clusters</TabsTrigger>
+          <TabsTrigger value="technical">Technical</TabsTrigger>
+          <TabsTrigger value="reporting">Reporting</TabsTrigger>
+          <TabsTrigger value="accessibility">Accessibility</TabsTrigger>
+          <TabsTrigger value="readability">Readability</TabsTrigger>
+          <TabsTrigger value="differentiation">Differentiation</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-8">
@@ -429,7 +439,94 @@ ${results.engagementScore.metrics ? `Metrics:\n${Object.entries(results.engageme
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="topic-clusters">
+          {results.topicClusters ? (
+            <TopicClustersView clusters={results.topicClusters} />
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              Topic Cluster data not available.
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="technical">
+          {results.technicalAudit ? (
+            <TechnicalAuditView audit={results.technicalAudit} />
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              Technical Audit data not available.
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="reporting">
+          {results.reporting ? (
+            <ReportingView reporting={results.reporting} />
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              Reporting data not available.
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="accessibility">
+          {results.accessibilityScore ? (
+            <div className="grid grid-cols-1 gap-6">
+              <ScoreCard
+                title="Accessibility Score"
+                score={results.accessibilityScore.score}
+                issues={results.accessibilityScore.issues}
+                recommendations={results.accessibilityScore.recommendations}
+                color="success"
+              />
+            </div>
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              Accessibility data not available.
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="readability">
+          {results.readabilityScore ? (
+            <div className="grid grid-cols-1 gap-6">
+              <ScoreCard
+                title="Readability Score"
+                score={results.readabilityScore.score}
+                issues={results.readabilityScore.issues}
+                recommendations={results.readabilityScore.recommendations}
+                color="warning"
+                metrics={results.readabilityScore.metrics}
+              />
+            </div>
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              Readability data not available.
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="differentiation">
+          {results.differentiationScore ? (
+            <div className="grid grid-cols-1 gap-6">
+              <ScoreCard
+                title="Differentiation Score"
+                score={results.differentiationScore.score}
+                issues={results.differentiationScore.issues}
+                recommendations={results.differentiationScore.recommendations}
+                color="accent"
+              />
+            </div>
+          ) : (
+            <div className="text-center p-8 text-muted-foreground">
+              Differentiation data not available.
+            </div>
+          )}
+        </TabsContent>
       </Tabs>
+
+      <AiChatWidget />
     </div>
   );
 };

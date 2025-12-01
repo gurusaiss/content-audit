@@ -75,18 +75,7 @@ export const mockAnalysis = async (content: string, targetKeyword?: string): Pro
                 "Engagement Potential": "High"
             }
         },
-        differentiationScore: {
-            score: 75,
-            issues: [
-                "Similar points covered by competitors",
-                "Unique value proposition is not clear"
-            ],
-            recommendations: [
-                "Highlight unique data or insights",
-                "Offer a contrarian viewpoint",
-                "Develop a proprietary framework or model"
-            ]
-        },
+
         engagementScore: {
             score: 82,
             issues: [
@@ -147,6 +136,87 @@ export const mockAnalysis = async (content: string, targetKeyword?: string): Pro
         snippetOptimization: {
             currentSnippet: content.slice(0, 150) + "...",
             potentialSnippet: `${keyword} is a strategic approach to creating and distributing valuable, relevant, and consistent content to attract and retain a clearly defined audience — and, ultimately, to drive profitable customer action.`
+        },
+        topicClusters: [
+            {
+                clusterName: `${keyword} Strategy`,
+                keywords: [`${keyword} plan`, `${keyword} framework`, `${keyword} roadmap`, "content calendar"],
+                relevance: 95
+            },
+            {
+                clusterName: "Content Creation",
+                keywords: ["blogging", "video content", "infographics", "copywriting"],
+                relevance: 88
+            },
+            {
+                clusterName: "SEO & Distribution",
+                keywords: ["keyword research", "link building", "social media marketing", "email newsletters"],
+                relevance: 82
+            }
+        ],
+        technicalAudit: {
+            score: 72,
+            issues: [
+                { severity: "critical", message: "Mobile viewport tag not optimized" },
+                { severity: "warning", message: "Slow server response time (>1s)" },
+                { severity: "info", message: "Schema markup partially detected" }
+            ],
+            metrics: {
+                mobileFriendly: false,
+                loadSpeed: "1.2s",
+                https: true,
+                schemaDetected: true
+            }
+        },
+        reporting: {
+            lastAuditDate: new Date().toISOString(),
+            nextScheduledAudit: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+            generatedReports: [
+                { name: "Weekly Content Audit", date: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), format: "PDF" },
+                { name: "Competitor Analysis", date: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString(), format: "CSV" }
+            ]
+        },
+        accessibilityScore: {
+            score: 88,
+            issues: [
+                "Some images missing alt text",
+                "Heading hierarchy skipped a level"
+            ],
+            recommendations: [
+                "Add descriptive alt text to images",
+                "Ensure H1-H6 tags are nested correctly"
+            ]
+        },
+        readabilityScore: {
+            score: 75,
+            issues: [
+                "Sentences are too complex",
+                "Passive voice usage is high"
+            ],
+            recommendations: [
+                "Shorten sentences to under 20 words",
+                "Use active voice for more impact"
+            ],
+            metrics: {
+                "Flesch-Kincaid Grade": "10.5",
+                "Avg. Sentence Length": "18 words"
+            }
+        },
+        plagiarismScore: {
+            score: 98,
+            originality: 98,
+            matches: []
+        },
+        differentiationScore: {
+            score: 82,
+            issues: [
+                "Unique value proposition could be stronger",
+                "Similar examples used by competitors"
+            ],
+            recommendations: [
+                "Highlight proprietary data or case studies",
+                "Emphasize your unique methodology"
+            ]
         }
     };
 };
